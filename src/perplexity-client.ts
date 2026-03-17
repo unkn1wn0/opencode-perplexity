@@ -250,15 +250,23 @@ export class PerplexityWebClient {
 
         let fullContent = "";
         let buffer = "";
+        let done = false;
+
+        const finalize = () => {
+          if (done) return;
+          done = true;
+          callbacks.onDone(fullContent);
+        };
 
         res.on("data", (chunk: Buffer) => {
-          if (abortController.signal.aborted) {
+          if (abortController.signal.aborted || done) {
             res.destroy();
             return;
           }
 
           buffer += chunk.toString();
-          const events = buffer.split("\r\n\r\n");
+          // Split on double newlines — SSE uses \n\n or \r\n\r\n
+          const events = buffer.split(/\r?\n\r?\n/);
           buffer = events.pop() || "";
 
           for (const event of events) {
@@ -269,7 +277,7 @@ export class PerplexityWebClient {
               trimmed.includes("event: end_of_stream") ||
               trimmed === "data: [DONE]"
             ) {
-              callbacks.onDone(fullContent);
+              finalize();
               return;
             }
 
@@ -293,7 +301,7 @@ export class PerplexityWebClient {
             }
           }
 
-          callbacks.onDone(fullContent);
+          finalize();
         });
 
         res.on("error", (error: Error) => {

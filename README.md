@@ -142,6 +142,20 @@ These tools are available to the AI agent inside OpenCode:
 
 ---
 
+## Changelog
+
+### v2.0.0 (Latest)
+- **Tool Use Emulation**: Perplexity models can now use OpenCode tools (read/write files, run bash commands) via a custom prompt injection technique that bypasses safety filters.
+- **SSE Streaming Fixes**: Fixed a bug where response reading would time out because Perplexity uses `\n\n` instead of `\r\n\r\n` for its SSE delimiter.
+- **Port Conflict Native Handling**: If a previous OpenCode session didn't cleanly shut down, the new proxy will gracefully detect and reuse the existing healthy proxy instead of failing silently.
+- **System Prompt Reinjection**: Agent personas and system instructions are now meticulously wrapped as task context to ensure Perplexity still adopts the OpenCode persona.
+- **Keep-Alive Headers**: Added keep-alive packets during tool buffering to ensure OpenCode does not drop the connection.
+
+### v1.0.0
+- Initial release: Proxy server, SSE streaming, cookie authentication, and basic global installation.
+
+---
+
 ## Troubleshooting
 
 | Error | Fix |
